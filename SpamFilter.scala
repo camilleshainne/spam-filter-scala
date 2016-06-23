@@ -1,3 +1,6 @@
+// Compile: scalac SpamFilter.scala
+// Run: scala SpamFilter [input_file].txt [spam_data].txt [ham_data].txt
+
 import java.io._
 import java.lang._
 import java.util._
@@ -7,26 +10,26 @@ import scala.util.control._
 
 object SpamFilter{
 	def main(args: Array[String]){
-		var spam = args(1)
-		var ham = args(2)
+		var spam = args(1)	// second argument for spam training data
+		var ham = args(2)	// third argument for ham training data
 		var spamfilter = new SpamFilter(spam, ham)
 
-		spamfilter.filterSpam(new File(args(0)))
+		spamfilter.filterSpam(new File(args(0))) // first argument for input file
 		spamfilter.filter()
 		spamfilter.saveOutput()
 	}
 
 	class SpamFilter(spamFile: String, hamFile: String) {
-		var spam = new BagOfWords(spamFile)	// second argument for spam training data
-		var ham = new BagOfWords(hamFile)	// third argument for ham training data
+		var spam = new BagOfWords(spamFile)
+		var ham = new BagOfWords(hamFile)
 		var message = new Hashtable[String, Double]();
 		var category = new Hashtable[String, String]()
 		var totalSize : Int = 0
 		var totalLines : Int = 0
 		var k : Int = 0
 
-		totalSize = this.getDictionarySize()
-		totalLines = spam.lines + ham.lines
+		totalSize = this.getDictionarySize()		// total dictionary size for spam and ham bag-of-words
+		totalLines = spam.lines + ham.lines		// total message lines of spam and ham bag-of-words
 
 		def getDictionarySize() : Int = {
 			var dictionarySize : Int = spam.dictionarySize
@@ -46,7 +49,7 @@ object SpamFilter{
 			var pWs : Double = 1.0		// P(message|spam)
 			var pWh : Double = 1.0		// P(message|ham)
 			var pSpam : Double = ((spam.lines + this.k).toDouble) / ((totalLines + (2 * k)).toDouble)	// P(spam)
-			var pHam : Double = ((ham.lines + this.k).toDouble) / ((totalLines + (2 * k)).toDouble)	// P(ham)
+			var pHam : Double = ((ham.lines + this.k).toDouble) / ((totalLines + (2 * k)).toDouble)		// P(ham)
 			var pSm : Double = 0.0		// P(spam|message)
 			var msg = new String
 
@@ -65,11 +68,11 @@ object SpamFilter{
 					var sp = new java.lang.Integer(spam.bagOfWords.get(m))
 					var ha = new java.lang.Integer(ham.bagOfWords.get(m))
 
-					if(sp == null) s = 0
+					if(sp == null) s = 0		// checks if word is in the spam bag-of-words
 					else s = sp
 					pWs *= (s + this.k).toDouble / (spam.totalWords + (this.k * (totalSize + num))).toDouble
 
-					if(ha == null) h = 0
+					if(ha == null) h = 0		// checks if word is in the ham bag-of-words
 					else h = ha
 					pWh *= (h + this.k).toDouble / (ham.totalWords + (this.k * (totalSize + num))).toDouble
 				}
@@ -117,8 +120,8 @@ object SpamFilter{
 			var key = new String
 
 			for(key <- this.message.keySet()){
-				if(this.message.get(key) > 0.5) this.category.put(key, "SPAM")
-				else this.category.put(key, "HAM")
+				if(this.message.get(key) > 0.5) this.category.put(key, "SPAM")	// categorizes message as spam
+				else this.category.put(key, "HAM")				// categorizes message as ham
 			}
 		}
 
